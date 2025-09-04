@@ -1,0 +1,22 @@
+[Unit]
+Description=Nightscout rotate kiosk (Chromium on Xorg)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Environment=DISPLAY=:0
+Restart=always
+RestartSec=2
+
+ExecStartPre=-/usr/bin/pkill -9 -f chromium
+ExecStartPre=-/usr/bin/pkill -9 -f chrome
+ExecStartPre=/bin/rm -f /tmp/.X0-lock
+ExecStartPre=/bin/rm -f /tmp/.X11-unix/X0
+
+# Xorg sur VT7 (pas vt1) puis script ci-dessus
+ExecStart=/usr/bin/xinit /usr/local/bin/ns-kiosk-start.sh -- :0 -s 0 -nolisten tcp vt1
+
+[Install]
+WantedBy=multi-user.target

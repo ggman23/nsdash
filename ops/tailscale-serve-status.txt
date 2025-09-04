@@ -1,0 +1,6 @@
+https://raspberrypi.tailab797d.ts.net (tailnet only)
+|-- /          proxy http://127.0.0.1:1337
+|-- /vendor    proxy http://127.0.0.1:8099/vendor
+|-- /dash/prod proxy http://127.0.0.1:8099/prod
+|-- /dash/test proxy http://127.0.0.1:8099/test
+
