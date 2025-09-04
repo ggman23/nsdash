@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+from flask import Flask, send_from_directory, request, Response
+import requests, os, sys
+
+ROOT   = "/var/www/nsdash"                 # static files (prod/test)
+TARGET = "http://127.0.0.1:1337"           # Nightscout
+PORT   = int(os.environ.get("PORT", "8088"))
+
+app = Flask(__name__, static_folder=ROOT, static_url_path="")
+def log(*a): print(*a, file=sys.stderr, flush=True)
+
+@app.route("/prod/")
+def prod_index():  return send_from_directory(os.path.join(ROOT,"prod"), "index.html")
+@app.route("/test/")
+def test_index():  return send_from_directory(os.path.join(ROOT,"test"), "index.html")
+@app.route("/prod/<path:p>")
+def prod_static(p): return send_from_directory(os.path.join(ROOT,"prod"), p)
+@app.route("/test/<path:p>")
+def test_static(p): return send_from_directory(os.path.join(ROOT,"test"), p)
+
+@app.route("/ns", defaults={'path': ''}, methods=["GET"])
+@app.route("/ns/", defaults={'path': ''}, methods=["GET"])
+@app.route("/ns/<path:path>", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS"])
+def proxy(path):
+    url = f"{TARGET}/{path}"
+    log(f"[NSPROXY] {request.method} {request.path} -> {url}")
+    r = requests.request(
+        request.method, url,
+        params=request.args, data=request.get_data(),
+        headers={k:v for k,v in request.headers if k.lower() not in ("host","content-length")},
+        stream=True, timeout=30
+    )
+    body = r.raw.read()
+    resp = Response(body, status=r.status_code)
+    for k,v in r.headers.items():
+        if k.lower() in ("content-type","cache-control","etag","last-modified","content-disposition"):
+            resp.headers[k] = v
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=PORT)
