@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_from_directory
+from flask import Flask, request, Response, send_from_directory, redirect
 import requests, os
 
 ROOT = "/var/www/nsdash"
@@ -6,7 +6,7 @@ UPSTREAM = "http://127.0.0.1:1337"
 
 app = Flask(__name__, static_folder=None)
 
-# Pages
+# --------- Pages (racine) ---------
 @app.route("/prod/")
 def prod():
     return send_from_directory(os.path.join(ROOT, "prod"), "index.html")
@@ -15,12 +15,12 @@ def prod():
 def test():
     return send_from_directory(os.path.join(ROOT, "test"), "index.html")
 
-# Assets locaux (Chart.js, adapter, etc.)
+# Assets locaux
 @app.route("/vendor/<path:fn>")
 def vendor(fn):
     return send_from_directory(os.path.join(ROOT, "vendor"), fn)
 
-# Fichiers statiques éventuels
+# Fichiers statiques
 @app.route("/prod/<path:fn>")
 def prod_files(fn):
     return send_from_directory(os.path.join(ROOT, "prod"), fn)
@@ -29,11 +29,10 @@ def prod_files(fn):
 def test_files(fn):
     return send_from_directory(os.path.join(ROOT, "test"), fn)
 
-# Proxy Nightscout (désactive la compression côté amont)
+# Proxy Nightscout (décompression côté amont désactivée)
 @app.route("/ns/<path:path>", methods=["GET","POST","PUT","PATCH","DELETE"])
 def ns_proxy(path):
     url = f"{UPSTREAM}/{path}"
-    # on nettoie certains en-têtes et on force Accept-Encoding: identity
     fwd_headers = {k: v for k, v in request.headers if k.lower() not in (
         "host","content-length","accept-encoding","connection"
     )}
@@ -49,7 +48,6 @@ def ns_proxy(path):
         timeout=20,
     )
 
-    # on enlève encodage/longueur/transfert: on renvoie le corps tel quel
     hop_by_hop = {"content-encoding","transfer-encoding","content-length","connection"}
     out_headers = [(k, v) for k, v in resp.headers.items() if k.lower() not in hop_by_hop]
     return Response(resp.content, status=resp.status_code, headers=out_headers)
@@ -58,6 +56,32 @@ def ns_proxy(path):
 def root():
     return Response("NS Dash is running", mimetype="text/plain")
 
-if __name__ == "__main__":
-    # IMPORTANT: on attache explicitement au 127.0.0.1:8099 (vu par tailscaled)
-    app.run(host="127.0.0.1", port=8099)
+# --------- Miroirs sous /dash/... (pour Tailscale) ---------
+@app.route("/dash/")
+def dash_root():
+    # Optionnel: redirige vers /dash/prod/
+    return redirect("/dash/prod/")
+
+@app.route("/dash/prod/")
+def dash_prod():
+    return prod()
+
+@app.route("/dash/test/")
+def dash_test():
+    return test()
+
+@app.route("/dash/vendor/<path:fn>")
+def dash_vendor(fn):
+    return vendor(fn)
+
+@app.route("/dash/prod/<path:fn>")
+def dash_prod_files(fn):
+    return prod_files(fn)
+
+@app.route("/dash/test/<path:fn>")
+def dash_test_files(fn):
+    return test_files(fn)
+
+@app.route("/dash/ns/<path:path>", methods=["GET","POST","PUT","PATCH","DELETE"])
+def dash_ns_proxy(path):
+    return ns_proxy(path)

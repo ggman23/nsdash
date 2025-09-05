@@ -1,0 +1,17 @@
+[Unit]
+Description=nsdash (APP d'origine) sur :8099
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=jucyla
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/srv/nsdash
+ExecStart=/usr/bin/python3 -u /srv/nsdash/app.py
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
