@@ -1,0 +1,80 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<title>NS Dash – PROD</title>
+<style>
+  html,body{height:100vh;margin:0;background:#0b0f1a;color:#e6e9ef;font-family:system-ui,Segoe UI,Roboto,Arial;overflow:hidden}
+  .wrap{position:fixed;inset:0;display:flex;flex-direction:column;min-width:0}
+  .header{padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .kpis{display:flex;gap:16px;flex-wrap:wrap}
+  .kpi{background:#131a2a;border:1px solid #223150;border-radius:14px;padding:10px 14px;min-width:140px}
+  .kpi b{display:block;font-size:13px;opacity:.8;white-space:nowrap}
+  .kpi .val{font-size:22px;font-weight:700;margin-top:4px}
+  .chart-wrap{flex:1;min-height:0;min-width:0;padding:0 8px 12px 8px}
+  canvas{width:100%!important;height:100%!important;display:block}
+  .note{opacity:.7;font-size:12px;margin-left:auto}
+</style>
+<link rel="preload" href="/vendor/chart.umd.min.js" as="script">
+<link rel="preload" href="/vendor/chartjs-adapter-date-fns.bundle.min.js" as="script">
+</head><body>
+<div class="wrap">
+  <div class="header">
+    <div class="kpis">
+      <div class="kpi"><b>GMI</b><div class="val" id="gmi">–</div></div>
+      <div class="kpi"><b>TIR 70–180</b><div class="val" id="tir">–</div></div>
+    </div>
+    <div class="note" id="status">Chargement…</div>
+  </div>
+  <div class="chart-wrap"><canvas id="cgms"></canvas></div>
+</div>
+
+<script src="/vendor/chart.umd.min.js"></script>
+<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+(function(){
+  const NS  = new URLSearchParams(location.search).get("ns") || "/ns";
+  const N   = 288;
+  const statusEl = document.getElementById('status');
+  const gmiEl = document.getElementById('gmi');
+  const tirEl = document.getElementById('tir');
+  const canvas = document.getElementById('cgms');
+
+  function pct(n){ return (n*100).toFixed(0)+"%"; }
+  function r1(x){ return Math.round(x*10)/10; }
+  function GMI(mean){ return r1(3.31 + 0.02392*mean); }
+  function TIR(vals){ if(!vals.length) return "–"; return pct(vals.filter(v=>v>=70&&v<=180).length/vals.length); }
+
+  async function load(){
+    try{
+      const st = await fetch(NS+"/api/v1/status").then(r=>r.text()).catch(()=> "");
+      statusEl.textContent = (st||"").includes("OK") ? "OK" : "Status inconnu";
+
+      const entries = await fetch(`${NS}/api/v1/entries/sgv.json?count=${N}`).then(r=>r.json());
+      entries.reverse();
+      const pts = entries.map(e => ({x:new Date(e.date||e.mills||e.dateString), y:e.sgv}));
+      const vals = pts.map(p=>p.y).filter(v=>typeof v==="number");
+      const mean = vals.reduce((a,b)=>a+b,0)/Math.max(1,vals.length);
+
+      gmiEl.textContent = GMI(mean) + " %";
+      tirEl.textContent = TIR(vals);
+
+      const ch = new Chart(canvas, {
+        type:'line',
+        data:{ datasets:[{ label:"Gly", data:pts, tension:0.2, pointRadius:0, borderWidth:2 }]},
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,   // plein écran
+          resizeDelay:0,
+          animation:false,
+          plugins:{ legend:{display:false} },
+          parsing:false,
+          scales:{ x:{type:'time', time:{unit:'hour'}}, y:{suggestedMin:40, suggestedMax:300, ticks:{stepSize:20}} }
+        }
+      });
+      window.addEventListener('resize', ()=>ch.resize());
+      setTimeout(()=>ch.resize(), 50);
+    }catch(e){ statusEl.textContent = "Erreur: "+(e?.message||e); }
+  }
+  load();
+})();
+</script>
+</body></html>

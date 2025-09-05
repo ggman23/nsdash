@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Nightscout – Dashboard TV</title>
+  <style>
+    :root{
+      --bg:#0e1116; --panel:#121722; --muted:#9aa4b2; --ok:#22c55e; --warn:#eab308; --bad:#ef4444; --line:#4cc3ff;
+      --text:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif}
+    .wrap{display:flex;flex-direction:column;height:100%;padding:14px;gap:12px}
+    .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:12px}
+    .clock{font-size:8vmin;font-weight:800;opacity:.9}
+    .value{display:flex;align-items:baseline;gap:12px;justify-content:center}
+    .bg{font-size:13vmin;font-weight:900;line-height:1}
+    .dir{font-size:8vmin}
+    .delta{font-size:5vmin;opacity:.9}
+    .right{justify-self:end;display:flex;gap:14px;align-items:end}
+    .pill{background:var(--panel);padding:8px 12px;border-radius:14px;font-weight:700;min-width:9ch;text-align:center}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .chartbox{flex:1;min-height:0;background:var(--panel);border-radius:16px;padding:10px}
+    canvas{width:100% !important;height:100% !important}
+    .foot{display:flex;justify-content:space-between;opacity:.7;font-size:2.6vmin}
+  </style>
+  <script src="/vendor/chart.umd.min.js"></script>
+  <script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="clock" id="clock">--:--</div>
+      <div class="value">
+        <div class="bg" id="bg">--</div>
+        <div class="dir" id="arrow">→</div>
+        <div class="delta" id="delta">Δ --</div>
+      </div>
+      <div class="right">
+        <div class="pill" id="gmi">GMI --</div>
+        <div class="pill" id="tir">TIR 70–180 --</div>
+        <div class="pill" id="age">OK</div>
+      </div>
+    </div>
+    <div class="chartbox"><canvas id="c"></canvas></div>
+    <div class="foot">
+      <div>Glycémie (mg/dL) • fenêtre <span id="rangeLabel">1 h</span></div>
+      <div id="updated">Maj: --</div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // --------- Helpers
+  const qs = new URLSearchParams(location.search);
+  const NS = (qs.get("ns") || "/ns").replace(/\/+$/,'');
+  const HOURS = +qs.get("h") || 6;        // passer ?h=1,3,6,12,24 si tu veux
+  const COUNT = Math.max(12, HOURS*12);   // 12 points/h si 5 min
+  const rangeLabel = {1:"1 h",3:"3 h",6:"6 h",12:"12 h",24:"24 h"}[HOURS] || (HOURS+" h");
+  document.getElementById('rangeLabel').textContent = rangeLabel;
+
+  const fmtTime = d => new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const by = (id)=>document.getElementById(id);
+
+  function arrowFor(slope){
+    if (slope > 3) return "↗";
+    if (slope > 1) return "→";
+    if (slope > -1) return "→";
+    if (slope > -3) return "→";
+    return "↘";
+  }
+  function tierClass(v){
+    if (v>=70 && v<=180) return "ok";
+    if ((v>180 && v<=200) || (v<70 && v>=60)) return "warn";
+    return "bad";
+  }
+
+  // --------- Chart
+  const ctx = by('c').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { datasets: [{label:'SGV', data:[], parsing:false, tension:.35, borderWidth:4, pointRadius:0}] },
+    options: {
+      animation:false, maintainAspectRatio:false, responsive:true,
+      scales:{
+        x:{type:'time', time:{unit:'minute', displayFormats:{minute:'HH:mm'}}, grid:{color:'rgba(255,255,255,0.06)'}},
+        y:{min:40,max:260, grid:{color:'rgba(255,255,255,0.06)'}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{mode:'nearest', intersect:false}
+      }
+    }
+  });
+  chart.data.datasets[0].borderColor = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#4cc3ff';
+
+  // --------- Fetch + compute
+  async function load() {
+    const r = await fetch(`${NS}/api/v1/entries/sgv.json?count=${COUNT}`, {cache:'no-store'});
+    const arr = await r.json();
+    arr.sort((a,b)=>a.date-b.date); // ordre croissant
+
+    const pts = arr.map(e=>({x:e.date, y:e.sgv}));
+    chart.data.datasets[0].data = pts;
+    chart.update();
+
+    if(arr.length){
+      const last = arr[arr.length-1];
+      const prev = arr[arr.length-2] || last;
+      const delta = (last.sgv - prev.sgv);
+      const sinceMin = Math.max(0, Math.round((Date.now()-last.date)/60000));
+      const cls = tierClass(last.sgv);
+
+      by('bg').textContent = last.sgv;
+      by('bg').className = `bg ${cls}`;
+      by('arrow').textContent = arrowFor(delta);
+      by('delta').textContent = `Δ ${delta>0?'+':''}${delta}`;
+      by('delta').className = `delta ${delta>=20||delta<=-20?'bad':(Math.abs(delta)>=10?'warn':'')}`;
+      by('age').textContent = sinceMin<=10 ? 'OK' : `${sinceMin} min`;
+      by('age').className = `pill ${sinceMin<=10?'ok':'warn'}`;
+      by('updated').textContent = `Maj: ${fmtTime(last.date)}`;
+    }
+
+    // TIR & GMI rapides sur la fenêtre
+    const inRange = arr.filter(e=>e.sgv>=70 && e.sgv<=180).length;
+    const tir = arr.length ? Math.round(inRange*100/arr.length) : 0;
+    by('tir').textContent = `TIR 70–180 ${tir}%`;
+    by('tir').className = `pill ${tir>=70?'ok':(tir>=50?'warn':'bad')}`;
+
+    const mean = arr.length ? Math.round(arr.reduce((s,e)=>s+e.sgv,0)/arr.length) : null;
+    if(mean){
+      // GMI approx (mg/dL → %HbA1c) ~ (47.304*Ln(mean)-86.221)/?? – on affiche juste la moyenne “GMI ~”
+      const gmi = (mean/18.0182/1.59 + 2.59); // approximation douce
+      by('gmi').textContent = `GMI ${gmi.toFixed(2)}%`;
+    } else {
+      by('gmi').textContent = `GMI --`;
+    }
+  }
+
+  // --------- Clock + polling
+  function tickClock(){ by('clock').textContent = fmtTime(Date.now()); }
+  tickClock(); setInterval(tickClock, 1000);
+
+  load(); setInterval(load, 60*1000);
+})();
+</script>
+</body>
+</html>
