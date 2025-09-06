@@ -1,0 +1,248 @@
+[
+    {
+        "Id": "589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6",
+        "Created": "2025-09-02T07:39:10.764670619Z",
+        "Path": "docker-entrypoint.sh",
+        "Args": [
+            "node",
+            "lib/server/server.js"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 1618,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-09-05T11:01:20.110041857Z",
+            "FinishedAt": "2025-09-05T12:52:54.762299096+02:00"
+        },
+        "Image": "sha256:f9d6b1d0988926f62da73becc8800441cf953ad9faba48a429f5f11c6ea58d63",
+        "ResolvConfPath": "/var/lib/docker/containers/589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6/hostname",
+        "HostsPath": "/var/lib/docker/containers/589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6/hosts",
+        "LogPath": "/var/lib/docker/containers/589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6/589aec2eecd4cd6bdd558cbf6f1b26f3dc10d7cdcb3fef965921a897ae6f19c6-json.log",
+        "Name": "/nightscout-nightscout-1",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "nightscout_default",
+            "PortBindings": {
+                "1337/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "1337"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "unless-stopped",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "KernelMemory": 0,
+            "KernelMemoryTCP": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/cf5ac988948cdf5d5af4e22e8e0ff8df3c0b51fd4198897263776b9076711493-init/diff:/var/lib/docker/overlay2/5aa7cafb5a165fb68176cab9e79d04051213c32471db53462f67f2bf3f62e071/diff:/var/lib/docker/overlay2/364bd936a947f24c0f05c9b331f0af4dbfc3640de600d3b1664774f905dd67b3/diff:/var/lib/docker/overlay2/9001d234a8f92b8056a62af4145c7373738e34fe2e404c7a38bcbebc2571fc59/diff:/var/lib/docker/overlay2/6af8440a9906327cfab9dfe4e120bb01a73b44aecd98bf77ecfff2d2118ab15d/diff:/var/lib/docker/overlay2/0827026f025c9524eceee50af0ad35ec4767e0c140b39d0532565cd060179c50/diff:/var/lib/docker/overlay2/fb7699258ed5456d5204198ce9d144e08e9f5fdf4ad1a3b71c23aa060f75cc06/diff:/var/lib/docker/overlay2/ce9d754a35ce71b439619cb9bb948d0da4c6c34e603288bf6402c885262bf261/diff",
+                "MergedDir": "/var/lib/docker/overlay2/cf5ac988948cdf5d5af4e22e8e0ff8df3c0b51fd4198897263776b9076711493/merged",
+                "UpperDir": "/var/lib/docker/overlay2/cf5ac988948cdf5d5af4e22e8e0ff8df3c0b51fd4198897263776b9076711493/diff",
+                "WorkDir": "/var/lib/docker/overlay2/cf5ac988948cdf5d5af4e22e8e0ff8df3c0b51fd4198897263776b9076711493/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "589aec2eecd4",
+            "Domainname": "",
+            "User": "node",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "1337/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "API_SECRET=Justine2511&&",
+                "DISPLAY_UNITS=mg/dl",
+                "INSECURE_USE_HTTP=true",
+                "BASE_URL=https://raspberrypi.tailab797d.ts.net",
+                "TZ=Europe/Paris",
+                "MONGO_CONNECTION=mongodb://mongo:27017/nightscout",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NODE_VERSION=16.16.0",
+                "YARN_VERSION=1.22.19"
+            ],
+            "Cmd": [
+                "node",
+                "lib/server/server.js"
+            ],
+            "Image": "nightscout/cgm-remote-monitor:latest",
+            "Volumes": null,
+            "WorkingDir": "/opt/app",
+            "Entrypoint": [
+                "docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "com.docker.compose.config-hash": "d456caa09723d7dabd64dbcad0075a15115a176aebef37931d1626bfbe72d055",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "mongo:service_started:false",
+                "com.docker.compose.image": "sha256:f9d6b1d0988926f62da73becc8800441cf953ad9faba48a429f5f11c6ea58d63",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "nightscout",
+                "com.docker.compose.project.config_files": "/data/compose/1/docker-compose.yml",
+                "com.docker.compose.project.working_dir": "/data/compose/1",
+                "com.docker.compose.replace": "aba84c4b639b85f6817df794b5e5bd987cb0ff2501aa1ef71f04d47e75342616",
+                "com.docker.compose.service": "nightscout",
+                "com.docker.compose.version": "",
+                "maintainer": "Nightscout Contributors"
+            }
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "68a9ac58866dfedb4a2519ba831664887d7b29a157c978c1bd37bd5b56c8ef58",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {
+                "1337/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "1337"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "1337"
+                    }
+                ]
+            },
+            "SandboxKey": "/var/run/docker/netns/68a9ac58866d",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "",
+            "Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "MacAddress": "",
+            "Networks": {
+                "nightscout_default": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "nightscout-nightscout-1",
+                        "nightscout",
+                        "589aec2eecd4"
+                    ],
+                    "NetworkID": "0629026aaa5c484186f9154738a8ba317dc67be74be9022ca5d4a7b9073f3210",
+                    "EndpointID": "bb681bb12bf23299ea9d4a9befe8f293b2ec431fa8aff1757dbcae67b7f4331c",
+                    "Gateway": "172.19.0.1",
+                    "IPAddress": "172.19.0.3",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:13:00:03",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]

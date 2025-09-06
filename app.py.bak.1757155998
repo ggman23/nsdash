@@ -58,6 +58,10 @@ def ns_proxy(path):
 def root():
     return Response("NS Dash is running", mimetype="text/plain")
 
+if __name__ == "__main__":
+    # IMPORTANT: on attache explicitement au 127.0.0.1:8099 (vu par tailscaled)
+    app.run(host="127.0.0.1", port=8099)
+
 # Compat: /api/* -> Nightscout (pour uploaders sans /ns)
 @app.route("/api/<path:path>", methods=["GET","POST","PUT","PATCH","DELETE"])
 def ns_api_compat(path):
@@ -73,6 +77,3 @@ def ns_api_compat(path):
     hop_by_hop = {"content-encoding","transfer-encoding","content-length","connection"}
     out_headers = [(k, v) for k, v in resp.headers.items() if k.lower() not in hop_by_hop]
     return Response(resp.content, status=resp.status_code, headers=out_headers)
-if __name__ == "__main__":
-    # écoute LAN
-    app.run(host="0.0.0.0", port=8099)

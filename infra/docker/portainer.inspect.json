@@ -1,0 +1,271 @@
+[
+    {
+        "Id": "577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4",
+        "Created": "2025-09-01T21:45:27.370253108Z",
+        "Path": "/portainer",
+        "Args": [],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 1611,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-09-05T11:01:18.686939228Z",
+            "FinishedAt": "2025-09-05T12:52:54.775103893+02:00"
+        },
+        "Image": "sha256:af759842dc6de1ed62294ed21d7358a913a2f439521492e15c699783b2732ba9",
+        "ResolvConfPath": "/var/lib/docker/containers/577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4/hostname",
+        "HostsPath": "/var/lib/docker/containers/577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4/hosts",
+        "LogPath": "/var/lib/docker/containers/577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4/577b3003b23385962a77a8d079a07285d7c992042beea16dd100203470c16ac4-json.log",
+        "Name": "/portainer",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/var/run/docker.sock:/var/run/docker.sock",
+                "portainer_data:/data"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "default",
+            "PortBindings": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "8000"
+                    }
+                ],
+                "9443/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "9443"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "always",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "KernelMemory": 0,
+            "KernelMemoryTCP": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/a556712ddb2f33ac5323c3bd6dcb69aed3cad4186abd8727eeccb6d12b8e3935-init/diff:/var/lib/docker/overlay2/a06dedc1b2019220f5f1138c006f9bd77efce733155108f3d0250b4dc64be921/diff:/var/lib/docker/overlay2/b7ecdafa96673f65046b5369c0d00515189df582e2de41ec28aeae2e1f6e7b0a/diff:/var/lib/docker/overlay2/fa149a54249bb553071262a7f3f44ed95d9b89776638ddbbe3d22731f9381ce0/diff:/var/lib/docker/overlay2/dacb7014d01f18eb7a7682b26ba6c537487e65a9ebe55c3ede5b4567fcb6fc4c/diff:/var/lib/docker/overlay2/aa01095b12b2e31807ce10bf2943fb0a90903aff0bbae0a752fd35c05ecac84a/diff:/var/lib/docker/overlay2/90be3f093c4435c17f49a880e7b6d206a83e81db93da1a787a01457335a86c3e/diff:/var/lib/docker/overlay2/6dcbdd1bded0534d4ffccf3149c3e0b9da7c2deeda9a4147e49b35890382b30e/diff:/var/lib/docker/overlay2/1e3935161e22b3e00512c034a3762a5f9e5b3be0ccc1d0820bba15e3a59df27d/diff",
+                "MergedDir": "/var/lib/docker/overlay2/a556712ddb2f33ac5323c3bd6dcb69aed3cad4186abd8727eeccb6d12b8e3935/merged",
+                "UpperDir": "/var/lib/docker/overlay2/a556712ddb2f33ac5323c3bd6dcb69aed3cad4186abd8727eeccb6d12b8e3935/diff",
+                "WorkDir": "/var/lib/docker/overlay2/a556712ddb2f33ac5323c3bd6dcb69aed3cad4186abd8727eeccb6d12b8e3935/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "portainer_data",
+                "Source": "/var/lib/docker/volumes/portainer_data/_data",
+                "Destination": "/data",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/var/run/docker.sock",
+                "Destination": "/var/run/docker.sock",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "577b3003b233",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {},
+                "9000/tcp": {},
+                "9443/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "Cmd": null,
+            "Image": "portainer/portainer-ce:latest",
+            "Volumes": {
+                "/data": {}
+            },
+            "WorkingDir": "/",
+            "Entrypoint": [
+                "/portainer"
+            ],
+            "OnBuild": null,
+            "Labels": {
+                "com.docker.desktop.extension.api.version": ">= 0.2.2",
+                "com.docker.desktop.extension.icon": "https://portainer-io-assets.sfo2.cdn.digitaloceanspaces.com/logos/portainer.png",
+                "com.docker.extension.additional-urls": "[{\"title\":\"Website\",\"url\":\"https://www.portainer.io?utm_campaign=DockerCon&utm_source=DockerDesktop\"},{\"title\":\"Documentation\",\"url\":\"https://docs.portainer.io\"},{\"title\":\"Support\",\"url\":\"https://join.slack.com/t/portainer/shared_invite/zt-txh3ljab-52QHTyjCqbe5RibC2lcjKA\"}]",
+                "com.docker.extension.detailed-description": "<p data-renderer-start-pos=\"226\">Portainer&rsquo;s Docker Desktop extension gives you access to all of Portainer&rsquo;s rich management functionality within your docker desktop experience.</p><h2 data-renderer-start-pos=\"374\">With Portainer you can:</h2><ul><li>See all your running containers</li><li>Easily view all of your container logs</li><li>Console into containers</li><li>Easily deploy your code into containers using a simple form</li><li>Turn your YAML into custom templates for easy reuse</li></ul><h2 data-renderer-start-pos=\"660\">About Portainer&nbsp;</h2><p data-renderer-start-pos=\"680\">Portainer is the worlds&rsquo; most popular universal container management platform with more than 650,000 active monthly users. Portainer can be used to manage Docker Standalone, Kubernetes and Docker Swarm environments through a single common interface. It includes a simple GitOps automation engine and a Kube API.&nbsp;</p><p data-renderer-start-pos=\"1006\">Portainer Business Edition is our fully supported commercial grade product for business-wide use. It includes all the functionality that businesses need to manage containers at scale. Visit <a class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/\" title=\"http://Portainer.io\" data-renderer-mark=\"true\">Portainer.io</a> to learn more about Portainer Business and <a class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/take-3?utm_campaign=DockerCon&amp;utm_source=Docker%20Desktop\" title=\"http://portainer.io/take-3?utm_campaign=DockerCon&amp;utm_source=Docker%20Desktop\" data-renderer-mark=\"true\">get 3 free nodes.</a></p>",
+                "com.docker.extension.publisher-url": "https://www.portainer.io",
+                "com.docker.extension.screenshots": "[{\"alt\": \"screenshot one\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-1.png\"},{\"alt\": \"screenshot two\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-2.png\"},{\"alt\": \"screenshot three\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-3.png\"},{\"alt\": \"screenshot four\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-4.png\"},{\"alt\": \"screenshot five\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-5.png\"},{\"alt\": \"screenshot six\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-6.png\"},{\"alt\": \"screenshot seven\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-7.png\"},{\"alt\": \"screenshot eight\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-8.png\"},{\"alt\": \"screenshot nine\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-9.png\"}]",
+                "io.portainer.server": "true",
+                "org.opencontainers.image.description": "Docker container management made simple, with the world’s most popular GUI-based container management platform.",
+                "org.opencontainers.image.title": "Portainer",
+                "org.opencontainers.image.vendor": "Portainer.io"
+            }
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "8c445d0aa79cfb9466077dcf2a1f9dd1a1a1402290957bb8b7b4a869b9f45062",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "8000"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "8000"
+                    }
+                ],
+                "9000/tcp": null,
+                "9443/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "9443"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "9443"
+                    }
+                ]
+            },
+            "SandboxKey": "/var/run/docker/netns/8c445d0aa79c",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "f5f2a1e10113795a71fbd3694e4602ffa4229130aed592cb114ed39477470b6d",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.3",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "02:42:ac:11:00:03",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "fa3dafb8dac0868d9bf427b5c84e6436c62d099bee0d2cb5681790fb74a7062d",
+                    "EndpointID": "f5f2a1e10113795a71fbd3694e4602ffa4229130aed592cb114ed39477470b6d",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.3",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:03",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]

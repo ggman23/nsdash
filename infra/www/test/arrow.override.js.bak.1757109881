@@ -1,0 +1,11 @@
+(()=>{const u=new URLSearchParams(location.search);let ns=u.get("ns")||"/ns";ns.endsWith("/")&&(ns=ns.slice(0,-1));
+function pickArrow(d){const x=Number(d);if(!isFinite(x))return "→";const a=Math.abs(x);if(a>=15)return x>0?"↑↑":"↓↓";if(a>=5)return x>0?"↑":"↓";return "→";}
+async function fetchDelta(){try{const r=await fetch(`${ns}/api/v1/entries/sgv.json?count=2`,{cache:"no-cache"});const A=await r.json();
+if(!Array.isArray(A)||A.length<2)return null;if(typeof A[0].delta==="number")return A[0].delta;return A[0].sgv-A[1].sgv;}catch(e){return null}}
+function findTrendNode(){const C=Array.from(document.querySelectorAll("*")).filter(el=>{const t=(el.textContent||"").trim();
+return t==="→"||t==="↑"||t==="↓"||t==="↑↑"||t==="↓↓"||/trend|arrow/i.test(el.className||"")||/trend|arrow/i.test(el.id||"")});return C[0]||null}
+let node=null;async function update(){node||(node=findTrendNode());const d=await fetchDelta();const g=pickArrow(d);
+if(node){node.textContent=g;node.setAttribute("title",`Δ ${d!=null?d:"?"} mg/dL (5min)`);}else{let h=document.querySelector("#now,.now,.current,h1,h2");h||(h=document.body);
+const s=document.createElement("span");s.style.fontSize="48px";s.style.marginLeft="12px";s.id="trend-arrow-override";s.textContent=g;
+s.title=`Δ ${d!=null?d:"?"} mg/dL (5min)`;h.appendChild(s);node=s;}}
+update();setInterval(update,60*1000);})();

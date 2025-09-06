@@ -1,0 +1,27 @@
+[Unit]
+Description=Nightscout rotate kiosk (Chromium on Xorg)
+After=network-online.target nsdash.service
+Wants=network-online.target nsdash.service
+
+[Service]
+Type=simple
+User=jucyla
+WorkingDirectory=/home/jucyla
+Environment=DISPLAY=:0
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Restart=always
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+# Nettoyage
+ExecStartPre=-/usr/bin/pkill -9 -f 'chromium|chrome|xinit|Xorg'
+
+# Attendre l'app d'origine sur 8099
+ExecStartPre=/bin/sh -lc 'for i in $(seq 1 40); do curl -sfI http://127.0.0.1:8099/prod/ >/dev/null && exit 0; sleep 1; done; exit 1'
+
+# Démarre X et le script client
+ExecStart=/usr/bin/xinit /usr/local/bin/kiosk-xclient.sh -- :0 -s 0 -nolisten tcp vt7
+
+[Install]
+WantedBy=multi-user.target

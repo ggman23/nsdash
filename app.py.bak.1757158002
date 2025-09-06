@@ -58,6 +58,9 @@ def ns_proxy(path):
 def root():
     return Response("NS Dash is running", mimetype="text/plain")
 
+if __name__ == "__main__":
+    # IMPORTANT: on attache explicitement au 127.0.0.1:8099 (vu par tailscaled)
+
 # Compat: /api/* -> Nightscout (pour uploaders sans /ns)
 @app.route("/api/<path:path>", methods=["GET","POST","PUT","PATCH","DELETE"])
 def ns_api_compat(path):

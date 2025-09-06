@@ -1,0 +1,6 @@
+NAMES                       IMAGE                                  STATUS        PORTS
+nightscout-nightscout-1     nightscout/cgm-remote-monitor:latest   Up 25 hours   0.0.0.0:1337->1337/tcp, :::1337->1337/tcp
+cloudflared                 cloudflare/cloudflared:latest          Up 25 hours   
+cloudflared-cloudflared-1   cloudflare/cloudflared:latest          Up 25 hours   
+nightscout-mongo-1          mongo:4.4.18                           Up 25 hours   27017/tcp
+portainer                   portainer/portainer-ce:latest          Up 25 hours   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp, 0.0.0.0:9443->9443/tcp, :::9443->9443/tcp, 9000/tcp
