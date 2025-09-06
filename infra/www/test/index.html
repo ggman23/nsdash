@@ -124,7 +124,7 @@ const ctx=$('#c').getContext('2d');
 const chart=new Chart(ctx,{type:'line',
   data:{datasets:[{data:[],tension:.15,borderWidth:3,pointRadius:(ctx=>{const a=ctx.chart?.data?.datasets?.[0]?.data||[];return a.length<=5?4:0}),segment:{borderColor:(ctx) => { const y = ctx.p0.parsed.y; const nextY = ctx.p1 ? ctx.p1.parsed.y : y; const avgY = (y + nextY) / 2; return avgY<70?"#ef4444":avgY<90?"#f59e0b":avgY<=180?"#22c55e":avgY<=200?"#f59e0b":"#ef4444"; }}}]},
   options:{animation:!1,responsive:!0,maintainAspectRatio:!1,resizeDelay:200,parsing:!1,
-    scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HH:mm'},tooltipFormat:'dd/MM HH:mm'},ticks:{color:'#e6eef7',font:{size:tickSize},padding:50}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize}}}},
+    scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HH'h''},tooltipFormat:'dd/MM HH'h''},ticks:{color:'#e6eef7',font:{size:tickSize},padding:35}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize}}}},
     plugins:{legend:{display:!1}}},plugins:[bandsPlugin]});
 applyTickSize();
 
