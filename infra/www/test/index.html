@@ -90,7 +90,7 @@ body.tv{scrollbar-width:none;-ms-overflow-style:none}
 
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <b class="ilabel">Indicateurs (dernières <span id=Hh>H</span> h)</b><span id=up class=badge>-</span></div>
+      <b class="ilabel">Indicateurs (dernières <span id=Hh>H</span> h)</b><span id="last12values" style="font-family: inherit; font-size: 22px; color: #9aa4b2; font-weight: bold;">Chargement...</span><span id=up class=badge>-</span></div>
     <div class=kpis>
       <div class=kpi><b>Min</b><span id=minW>—</span></div>
       <div class=kpi><b>Moyenne</b><span id=avgW>—</span></div>
@@ -117,14 +117,14 @@ let tickSize = (()=>Math.max(12, Math.min(20, Math.round(window.innerWidth/40)))
 function applyTickSize(){ chart.options.scales.x.ticks.font.size=tickSize; chart.options.scales.y.ticks.font.size=tickSize; }
 window.addEventListener('resize',()=>{ const n=Math.max(12, Math.min(20, Math.round(window.innerWidth/40))); if(n!==tickSize){ tickSize=n; applyTickSize(); chart.update('none'); }});
 
-const bands={r1:[0,70],y1:[70,90],g:[90,180],y2:[180,200],r2:[200,350]};
-const bandsPlugin={id:'bands',beforeDatasetsDraw(c){const {ctx,chartArea,scales:{y}}=c;if(!chartArea)return;ctx.save();ctx.globalAlpha=.08;const W=chartArea.right-chartArea.left;const band=(a,b,col)=>{const top=Math.max(chartArea.top+3, y.getPixelForValue(b)), bot=Math.min(chartArea.bottom+28, y.getPixelForValue(a)); if(bot>top){ctx.fillStyle=col; ctx.fillRect(chartArea.left,top,W,bot-top);}};band(...bands.r1,colors.r);band(...bands.y1,colors.y);band(...bands.g,colors.g);band(...bands.y2,colors.y);band(...bands.r2,colors.r);ctx.restore();}};
+const bands={r1:[0,70],y1:[70,90],g:[90,180],y2:[180,200],r2:[200,300]};
+const bandsPlugin={id:'bands',beforeDatasetsDraw(c){const {ctx,chartArea,scales:{y}}=c;if(!chartArea)return;ctx.save();ctx.globalAlpha=.08;const W=chartArea.right-chartArea.left;const band=(a,b,col)=>{const top=Math.max(chartArea.top, y.getPixelForValue(b)), bot=Math.min(chartArea.bottom, y.getPixelForValue(a)); if(bot>top){ctx.fillStyle=col; ctx.fillRect(chartArea.left,top,W,bot-top);}};band(...bands.r1,colors.r);band(...bands.y1,colors.y);band(...bands.g,colors.g);band(...bands.y2,colors.y);band(...bands.r2,colors.r);ctx.restore();}};
 
 const ctx=$('#c').getContext('2d');
 const chart=new Chart(ctx,{type:'line',
   data:{datasets:[{data:[],tension:.15,borderWidth:3,pointRadius:(ctx=>{const a=ctx.chart?.data?.datasets?.[0]?.data||[];return a.length<=5?4:0}),segment:{borderColor:(ctx) => { const y = ctx.p0.parsed.y; const nextY = ctx.p1 ? ctx.p1.parsed.y : y; const avgY = (y + nextY) / 2; return avgY<70?"#ef4444":avgY<90?"#f59e0b":avgY<=180?"#22c55e":avgY<=200?"#f59e0b":"#ef4444"; }}}]},
-  options:{animation:!1,responsive:!0,maintainAspectRatio:!1,resizeDelay:200,parsing:!1,layout:{padding:{top:5,bottom:5}},
-    scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HH:mm'},tooltipFormat:'dd/MM HH:mm'},ticks:{color:'#e6eef7',font:{size:tickSize},padding:35}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize},padding:2}}},
+  options:{animation:!1,responsive:!0,maintainAspectRatio:!1,resizeDelay:200,parsing:!1,
+    scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HH:mm'},tooltipFormat:'dd/MM HH:mm'},ticks:{color:'#e6eef7',font:{size:tickSize},padding:50}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize}}}},
     plugins:{legend:{display:!1}}},plugins:[bandsPlugin]});
 applyTickSize();
 
@@ -187,6 +187,13 @@ function render(h){
     $('#yrange').textContent=`Y = ${yMin}–${yMax} mg/dL`;
   }
   chart.data.datasets[0].data=line; chart.update();
+  if(D90.length >= 12) {
+    const last12 = D90.slice(-12).map(e => e.sgv);
+    $('#last12values').textContent = last12.join(" - ");
+  } else if(D90.length > 0) {
+    const available = D90.slice(-Math.min(12, D90.length)).map(e => e.sgv);
+    $('#last12values').textContent = available.join(" - ");
+  }
 
   const vals=line.map(p=>p.y);
   const sW=(arr=>{if(!arr.length)return{min:NaN,max:NaN,mean:NaN,tir:NaN};let mi=1/0,ma=-1/0,s=0,t=0,c=0;for(const v of arr){c++; if(v<mi)mi=v; if(v>ma)ma=v; s+=v; if(v>=70&&v<=180)t++} return{min:mi,max:ma,mean:s/(c||1),tir:c?100*t/c:NaN}})(vals);
