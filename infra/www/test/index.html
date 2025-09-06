@@ -122,7 +122,7 @@ const bandsPlugin={id:'bands',beforeDatasetsDraw(c){const {ctx,chartArea,scales:
 
 const ctx=$('#c').getContext('2d');
 const chart=new Chart(ctx,{type:'line',
-  data:{datasets:[{data:[],tension:.15,borderWidth:3,pointRadius:(ctx=>{const a=ctx.chart?.data?.datasets?.[0]?.data||[];return a.length<=5?4:0}),segment:{borderColor:e=>colFor(e.p0.parsed.y)}}]},
+  data:{datasets:[{data:[],tension:.15,borderWidth:3,pointRadius:(ctx=>{const a=ctx.chart?.data?.datasets?.[0]?.data||[];return a.length<=5?4:0}),segment:{borderColor:(ctx) => { const y = ctx.p0.parsed.y; const nextY = ctx.p1 ? ctx.p1.parsed.y : y; const avgY = (y + nextY) / 2; return avgY<70?"#ef4444":avgY<90?"#f59e0b":avgY<=180?"#22c55e":avgY<=200?"#f59e0b":"#ef4444"; }}}]},
   options:{animation:!1,responsive:!0,maintainAspectRatio:!1,resizeDelay:200,parsing:!1,
     scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HH:mm'},tooltipFormat:'dd/MM HH:mm'},ticks:{color:'#e6eef7',font:{size:tickSize}}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize}}}},
     plugins:{legend:{display:!1}}},plugins:[bandsPlugin]});
@@ -143,7 +143,8 @@ function densifyLine(pts, thrs=[70,90,180,200]){
       const t=(T-y0)/(y1-y0);
       if(t>0 && t<1){
         const x=a.x + t*(b.x-a.x);
-        out.push({x,y:T,dir:b.dir||a.dir,_i:true});
+        // Point critique: forcer le recalcul de couleur pour la valeur Y exacte
+        out.push({x,y:T,dir:b.dir||a.dir,_i:true,_forceColor:true});
       }
     }
   }
@@ -225,5 +226,5 @@ setInterval(async()=>{
 },1000);
 </script>
   <script src="/test/arrow.override.js?v=1757105869"></script>
-  <script src="/test/override.live.js?v=1757155879" defer></script>
+  <script src="/test/nsdash-fix.js?v=1757155879" defer></script>
 </body></html>
