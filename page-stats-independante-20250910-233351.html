@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistiques Glycémiques</title>
+  <style>
+    body {
+      background: #0a0f1a;
+      color: #e6eef7;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 30px;
+    }
+    
+    .back-btn {
+      background: #0c121b;
+      border: 1px solid #223049;
+      color: #e6eef7;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .back-btn:hover {
+      background: #1a2332;
+    }
+    
+    .datetime {
+      font-size: 16px;
+      color: #9aa4b2;
+    }
+    
+    .title {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 28px;
+    }
+    
+    .stats-container {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+    }
+    
+    .camembert {
+      text-align: center;
+    }
+    
+    .circle {
+      width: 200px;
+      height: 200px;
+      border: 3px solid #9aa4b2;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    
+    .circle-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .camembert-title {
+      font-size: 16px;
+      color: #9aa4b2;
+      margin-bottom: 10px;
+    }
+    
+    .info {
+      margin-top: 40px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="/test/index.html" class="back-btn">← Dashboard</a>
+    <div class="datetime" id="datetime">--</div>
+  </div>
+  
+  <h1 class="title">Statistiques Glycémiques</h1>
+  
+  <div class="stats-container">
+    <div class="camembert">
+      <div class="circle">
+        <div class="circle-label">24h</div>
+      </div>
+      <div class="camembert-title">Moyennes par heure</div>
+    </div>
+    
+    <div class="camembert">
+      <div class="circle">
+        <div class="circle-label">12h-24h</div>
+      </div>
+      <div class="camembert-title">Après-midi/Soir</div>
+    </div>
+  </div>
+  
+  <div class="info">
+    Camemberts-horloges en développement...
+  </div>
+
+  <script>
+    // Affichage de la date/heure
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('datetime').textContent = 
+        now.toLocaleDateString('fr-FR') + ' ' + 
+        now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+  </script>
+</body>
+</html>
