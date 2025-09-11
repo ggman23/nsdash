@@ -1,0 +1,276 @@
+<!doctype html><html lang=fr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>NS Dashboard</title>
+<style>
+:root{--bg:#0b0f14;--fg:#e6eef7;--mut:#9bb0c3;--card:#121823;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--btn:#3aa6ff}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,Segoe UI,Roboto,Arial;overflow:auto}
+body.tv{overflow:hidden}
+header{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#0e141d;border-bottom:1px solid #1e2a3a;flex-wrap:wrap}
+h1{margin:0;font-size:16px}
+input,button{padding:6px 8px;border-radius:8px;border:1px solid #233146;background:#0c121b;color:var(--fg)}
+button{background:var(--btn);border:0;color:#001;font-weight:700;cursor:pointer}
+.badge{background:#0c121b;border:1px solid #223049;border-radius:999px;padding:2px 8px;color:var(--mut)}
+.layout{display:grid;grid-template-rows:auto 1fr auto;min-height:calc(100svh - 42px)}
+.hero.card{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.big{font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+#now.big{font-size:clamp(28px,6vw,76px)}
+#last.big{font-size:clamp(44px,10vw,110px)}
+.trend{font-size:clamp(44px,10vw,110px);font-weight:900;margin-left:14px}
+#right{display:flex;flex-direction:column;align-items:center;justify-self:end}
+.deltaBig{font-size:clamp(28px,6vw,76px);font-weight:900}
+.rightSub{display:block;font-size:clamp(12px,3.2vw,20px);color:var(--mut);margin-top:4px;text-align:center}
+.card{background:#121823;border:1px solid #1f2b3b;border-radius:12px;padding:10px;margin:10px}
+.card-head{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.btngrp{display:flex;gap:6px;flex-wrap:wrap}
+.hbtn{background:#0c121b;border:1px solid #223049;color:var(--fg);padding:6px 10px;border-radius:8px;min-width:56px;text-align:center}
+.hbtn.active{background:var(--btn);color:#001;border-color:transparent;font-weight:800}
+.chart{height:52svh;position:relative}
+body.tv .chart{height:54vh}
+canvas{width:100%!important;height:100%!important;display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.kpi{background:#0c121b;border:1px solid #223049;border-radius:10px;padding:12px;text-align:center}
+.kpi b{display:block;color:#9bb0c3;font-size:clamp(12px,2.6vw,22px);margin-bottom:8px}
+.kpi span{font-size:clamp(18px,4.6vw,32px);font-weight:800}
+.ilabel{font-size:clamp(16px,3vw,22px)}
+#tvhard{display:none}
+</style>
+<style id="tvhard">
+body.tv,html{height:100vh;overflow:hidden}
+body.tv header{display:none}
+body.tv .layout{position:fixed;inset:0;display:flex;flex-direction:column;gap:8px;min-height:auto;overflow:hidden}
+body.tv .card{margin:0 8px}
+body.tv .layout>.card:nth-of-type(2){flex:1 1 auto;min-height:0}
+body.tv .chart{height:100%}
+body.tv ::-webkit-scrollbar{display:none;width:0;height:0}
+body.tv{scrollbar-width:none;-ms-overflow-style:none}
+</style>
+<script src="/vendor/chart.umd.min.js"></script>
+<script src="/vendor/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script>(function(){
+    try{
+      var u=new URL(location.href);
+      if(!u.searchParams.get("ns")) u.searchParams.set("ns","/ns");
+      if(!u.searchParams.get("mode")) u.searchParams.set("mode","tv");
+      if(location.search!==u.search) location.replace(u.toString());
+    }catch(e){}
+  })();</script>
+  <link rel="stylesheet" href="/test/mobile-styles.css" media="screen">
+</head><body>
+<header>
+  <h1>Nightscout • Rotation 1→3→6→12→24 h (auto/tv)</h1>
+  <input id=ns placeholder="NS (ex: /ns)" style="min-width:240px">
+  <input id=tk placeholder="Token (optionnel)">
+  <button id=pp title="Pause/Play rotation (P)">⏸️ Pause</button>
+  <span id=st class=badge>Prêt</span>
+</header>
+
+<div class=layout>
+  <div class="hero card">
+    <div id=now class="big">--:--</div>
+    <div class=center style="display:flex;align-items:baseline;justify-content:center">
+      <div id=last class="big">—</div><div id=trend class="trend">•</div>
+    </div>
+    <div id=right><div id=delta class="deltaBig">Δ—</div><span id=ago class="rightSub">-</span></div>
+  </div>
+
+  <div class="card" style="padding: 1px 10px 10px 10px;">
+    <div class="card-head">
+      <b>Glycémie</b>
+      <div class="btngrp">
+        <button class="hbtn" data-h="1">1 h</button>
+        <button class="hbtn" data-h="3">3 h</button>
+        <button class="hbtn" data-h="6">6 h</button>
+        <button class="hbtn" data-h="12">12 h</button>
+        <button class="hbtn" data-h="24">24 h</button>
+        <button class="hbtn" data-h="stats">Stats</button>
+<button class="hbtn" data-h="moydays">Moy</button>        
+<button class="hbtn" id="pauseBtn">⏸</button>
+      </div>
+      <span class="badge" id=yrange>—</span>
+    </div>
+    <div class=chart><canvas id=c></canvas></div>
+  </div>
+
+  <div class="card" style="padding: 1px 10px 10px 10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <b class="ilabel">Indicateurs (dernières <span id=Hh>H</span> h)</b><span id="last12values" style="font-family: inherit; font-size: 22px; color: #9aa4b2; font-weight: bold;">Chargement...</span><span id=up class=badge>-</span></div>
+    <div class=kpis>
+      <div class=kpi><b>Min</b><span id=minW>—</span></div>
+      <div class=kpi><b>Moyenne</b><span id=avgW>—</span></div>
+      <div class=kpi><b>Max</b><span id=maxW>—</span></div>
+      <div class=kpi><b>HbA1c</b><span id=gmiW>—</span></div>
+      <div class=kpi><b>TIR 70–180</b><span id=tirW>—</span></div>
+      <div class=kpi><b>HbA1c (90 j)</b><span id=gmi90>—</span></div>
+      <div class=kpi><b>TIR 70–180 (90 j)</b><span id=tir90>—</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),qs=new URLSearchParams(location.search);
+const MODE=(qs.get('mode')||'auto').toLowerCase(); if(MODE==='tv'){document.body.classList.add('tv')}
+const NS=qs.get('ns')||localStorage.ns||'/ns',TK=qs.get('token')||localStorage.tk||'';
+$('#ns').value=NS; $('#tk').value=TK;
+
+const colors={r:'#ef4444',y:'#f59e0b',g:'#22c55e'};
+const colFor=v=>v<70?colors.r:v<90?colors.y:v<=180?colors.g:v<=200?colors.y:colors.r;
+Chart.defaults.color='#e6eef7';
+Chart.defaults.font.family='system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial';
+let tickSize = (()=>Math.max(12, Math.min(20, Math.round(window.innerWidth/40))))();
+function applyTickSize(){ chart.options.scales.x.ticks.font.size=tickSize; chart.options.scales.y.ticks.font.size=tickSize; }
+window.addEventListener('resize',()=>{ const n=Math.max(12, Math.min(20, Math.round(window.innerWidth/40))); if(n!==tickSize){ tickSize=n; applyTickSize(); chart.update('none'); }});
+
+const bands={r1:[0,70],y1:[70,90],g:[90,180],y2:[180,200],r2:[200,300]};
+const bandsPlugin={id:'bands',beforeDatasetsDraw(c){const {ctx,chartArea,scales:{y}}=c;if(!chartArea)return;ctx.save();ctx.globalAlpha=.08;const W=chartArea.right-chartArea.left;const band=(a,b,col)=>{const top=Math.max(chartArea.top+1, y.getPixelForValue(b)), bot=Math.min(chartArea.bottom+28, y.getPixelForValue(a)); if(bot>top){ctx.fillStyle=col; ctx.fillRect(chartArea.left,top,W,bot-top);}};band(...bands.r1,colors.r);band(...bands.y1,colors.y);band(...bands.g,colors.g);band(...bands.y2,colors.y);band(...bands.r2,colors.r);ctx.restore();}};
+
+const ctx=$('#c').getContext('2d');
+const chart=new Chart(ctx,{type:'line',
+  data:{datasets:[{data:[],tension:.15,borderWidth:3,pointRadius:(ctx=>{const a=ctx.chart?.data?.datasets?.[0]?.data||[];return a.length<=5?4:0}),segment:{borderColor:(ctx) => { const y = ctx.p0.parsed.y; const nextY = ctx.p1 ? ctx.p1.parsed.y : y; const avgY = (y + nextY) / 2; return avgY<70?"#ef4444":avgY<90?"#f59e0b":avgY<=180?"#22c55e":avgY<=200?"#f59e0b":"#ef4444"; }}}]},
+  options:{animation:!1,responsive:!0,maintainAspectRatio:!1,resizeDelay:200,parsing:!1,
+    scales:{x:{type:'time',time:{unit:'hour',displayFormats:{hour:'HHʰ'},tooltipFormat:'dd/MM HHʰ'},ticks:{color:'#e6eef7',font:{size:tickSize},padding:35}},y:{min:50,max:300,ticks:{stepSize:50,color:'#e6eef7',font:{size:tickSize}}}},
+    plugins:{legend:{display:!1}}},plugins:[bandsPlugin]});
+applyTickSize();
+
+const HSEQ=[1,3,6,12,24,"stats"]; let rotIdx=0, left=60, paused=false;
+let lastFetch=0, FETCH_MS=295000, D90=[], LAST=null;
+
+function densifyLine(pts, thrs=[70,90,180,200]){
+  if(pts.length<2) return pts.slice();
+  const out=[];
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1]; out.push(a);
+    const y0=a.y, y1=b.y; if(y0===y1) continue;
+    const min=Math.min(y0,y1), max=Math.max(y0,y1);
+    const cross=thrs.filter(T=>T>min && T<max).sort((u,v)=> (y1>y0?u-v:v-u));
+    for(const T of cross){
+      const t=(T-y0)/(y1-y0);
+      if(t>0 && t<1){
+        const x=a.x + t*(b.x-a.x);
+        // Point critique: forcer le recalcul de couleur pour la valeur Y exacte
+        out.push({x,y:T,dir:b.dir||a.dir,_i:true,_forceColor:true});
+      }
+    }
+  }
+  out.push(pts[pts.length-1]);
+  return out;
+}
+
+async function fetchData(){
+  const base=$('#ns').value.trim().replace(/\/$/,''); const t=$('#tk').value||'';
+  const tq=t?(base.includes('?')?`&token=${encodeURIComponent(t)}`:`?token=${encodeURIComponent(t)}`):'';
+  const now=Date.now(), n90=now-90*24*60*60*1000;
+  const r=await fetch(`${base}/api/v1/entries/sgv.json?find[date][$gte]=${n90}&count=30000${tq}`,{cache:'no-store'});
+  if(!r.ok){ throw new Error('HTTP '+r.status); }
+  D90=(await r.json()).filter(e=>e&&e.sgv!=null&&e.date!=null).sort((a,b)=>a.date-b.date);
+  LAST=D90[D90.length-1]||null; lastFetch=Date.now();
+  if(LAST){ const prev=D90[D90.length-2]||LAST, dlt=LAST.sgv-(prev.sgv||LAST.sgv), c=colFor(LAST.sgv);
+    $('#last').textContent=Math.round(LAST.sgv); $('#last').style.color=c;
+    $('#trend').textContent=({DoubleUp:'⬆⬆',SingleUp:'⬆',FortyFiveUp:'↗',Flat:'→',FortyFiveDown:'↘',SingleDown:'⬇',DoubleDown:'⬇⬇'}[LAST.direction||LAST.trend]||'•'); $('#trend').style.color=c;
+    $('#now').textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',hour12:false});
+    $('#delta').textContent=`Δ${(dlt>=0?'+':'')+Math.round(dlt)}`; $('#delta').style.color=c;
+    const s=Math.max(0,Math.round((Date.now()-LAST.date)/1000)); const m=Math.floor(s/60); const ago=m<1? s+'s' : (m<60? m+'m' : Math.floor(m/60)+'h'+(m%60?' '+(m%60)+'m':''));
+    $('#ago').textContent='il y a '+ago;
+  }
+}
+
+function updateButtons(h){document.querySelectorAll('.hbtn').forEach(b=>b.classList.toggle('active', b.dataset.h==h))}
+function render(h){
+  // Gestion Stats
+  if(h === "stats") {
+    $("#Hh").textContent = "Stats";
+    updateButtons("stats");
+    console.log("🔘 Mode Stats activé");
+    return;
+  }
+  if(!D90.length) return;
+  $('#Hh').textContent=h; updateButtons(h);
+  const now=Date.now(), from=now-h*3600*1000;
+  const win=D90.filter(e=>e.date>=from);
+  const raw=win.map(e=>({x:e.date,y:e.sgv,dir:e.direction||e.trend}));
+  const line=densifyLine(raw);
+  if(line.length){
+    const vals=line.map(p=>p.y), vmin=Math.min(...vals), vmax=Math.max(...vals);
+    let yMin=Math.floor(Math.max(40, vmin-10)/10)*10, yMax=Math.ceil((vmax+10)/10)*10;
+    if(yMax<=yMin) yMax=yMin+20;
+    chart.options.scales.y.min=yMin; chart.options.scales.y.max=yMax;
+    chart.options.scales.y.ticks.stepSize=Math.max(10, Math.round((yMax-yMin)/6/10)*10||10);
+    $('#yrange').textContent=`Y = ${yMin}–${yMax} mg/dL`;
+  }
+  chart.data.datasets[0].data=line; chart.update();
+  if(D90.length >= 12) {
+    const isMobile = window.innerWidth <= 768;
+    const valueCount = isMobile ? 3 : 16;
+    const last12 = D90.slice(-valueCount).map(e => e.sgv);
+    $('#last12values').textContent = last12.join(" - ");
+  } else if(D90.length > 0) {
+    const isMobile = window.innerWidth <= 768;
+    const valueCount = isMobile ? 3 : 16;
+    const available = D90.slice(-Math.min(valueCount, D90.length)).map(e => e.sgv);
+    $('#last12values').textContent = available.join(" - ");
+  }
+
+  const vals=line.map(p=>p.y);
+  const sW=(arr=>{if(!arr.length)return{min:NaN,max:NaN,mean:NaN,tir:NaN};let mi=1/0,ma=-1/0,s=0,t=0,c=0;for(const v of arr){c++; if(v<mi)mi=v; if(v>ma)ma=v; s+=v; if(v>=70&&v<=180)t++} return{min:mi,max:ma,mean:s/(c||1),tir:c?100*t/c:NaN}})(vals);
+  const gmi=m=>{if(!isFinite(m))return NaN; const g=3.31+0.02392*m; return Math.max(4,Math.min(14,g));}
+  $('#minW').textContent=isFinite(sW.min)?Math.round(sW.min):'—';
+  $('#avgW').textContent=isFinite(sW.mean)?Math.round(sW.mean):'—';
+  $('#maxW').textContent=isFinite(sW.max)?Math.round(sW.max):'—';
+  $('#gmiW').textContent=isFinite(sW.mean)?gmi(sW.mean).toFixed(2)+'%':'—';
+  $('#tirW').textContent=isFinite(sW.tir)?sW.tir.toFixed(1)+'%':'—';
+
+  const all=D90.map(e=>e.sgv);
+  const s90=(arr=>{if(!arr.length)return{mean:NaN,tir:NaN};let s=0,t=0,c=0;for(const v of arr){c++; s+=v; if(v>=70&&v<=180)t++}return{mean:s/(c||1),tir:c?100*t/c:NaN}})(all);
+  $('#gmi90').textContent=isFinite(s90.mean)?gmi(s90.mean).toFixed(2)+'%':'—';
+  $('#tir90').textContent=isFinite(s90.tir)?s90.tir.toFixed(1)+'%':'—';
+
+  $('#up').textContent='Maj: '+new Date().toLocaleString();
+}
+
+document.querySelectorAll('.hbtn').forEach(b=>b.addEventListener('click',()=>{
+  const h=b.dataset.h; 
+  if(h === "stats") {
+    window.location.href = '/test/stats.html';
+    return;
+  }
+if(h === "moydays") {
+    window.location.href = '/test/moydays.html';
+    return;
+  }
+
+  const idx=HSEQ.indexOf(Number(h)); if(idx>=0) rotIdx=idx;
+  left=60; render(HSEQ[rotIdx]);
+}));
+
+function setPaused(p){paused=p; $('#pp').textContent=p?'▶️ Play':'⏸️ Pause';}
+$('#pp').onclick=()=>setPaused(!paused);
+document.addEventListener('keydown',e=>{ if((e.key||'').toLowerCase()==='p') setPaused(!paused) });
+
+(async()=>{ try{ $('#st').textContent='Chargement…'; await fetchData(); render(1); $('#st').textContent='OK'; }catch(e){ console.error(e); $('#st').textContent='Erreur: '+e.message; }})();
+setInterval(async()=>{
+  if(!paused){
+    left--; if(left<=0){ left=60; rotIdx=(rotIdx+1)%HSEQ.length; render(HSEQ[rotIdx]); }
+    $('#st').textContent=`Fenêtre ${HSEQ[rotIdx]}h • Rotation dans ${left}s`;
+  }else{
+    $('#st').textContent=`⏸ Pause • Fenêtre ${HSEQ[rotIdx]}h`;
+  }
+  if(Date.now()-lastFetch>FETCH_MS){ try{ await fetchData(); render(HSEQ[rotIdx]); }catch(e){ console.error(e); } }
+},1000);
+</script>
+  <script src="/test/arrow.override.js?v=1757105869"></script>
+  <script src="/test/nsdash-fix.js?v=1757212580" defer></script>
+<script>
+window.addEventListener("orientationchange", function() {
+  setTimeout(function() {
+    location.reload();
+  }, 100);
+});
+</script>
+<script>
+// Fonctionnalité pause/play simple
+document.getElementById("pauseBtn").addEventListener("click", function() {
+  paused = !paused;
+  this.textContent = paused ? "▶" : "⏸";
+});
+</script>
+</body></html>
