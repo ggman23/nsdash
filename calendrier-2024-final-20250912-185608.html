@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moyennes 2024</title>
+  <style>
+    body {
+      background: #0a0f1a;
+      color: #e6eef7;
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 5px;
+      min-height: 100vh;
+      overflow-x: auto;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .back-btn {
+      background: #0c121b;
+      border: 1px solid #223049;
+      color: #e6eef7;
+      padding: 6px 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .title {
+      text-align: center;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+    
+.calendar-container {
+  margin-bottom: 20px;
+  width: 100%;
+  padding: 0;
+} 
+   
+.calendar {
+  display: grid;
+  grid-template-columns: 60px repeat(31, 1fr) 50px;
+  gap: 1px;
+  margin-bottom: 2px;
+  width: 100%;
+}    
+    .month-name {
+  background: #1a2332;
+  padding: 5px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-day {
+  background: #121823;
+  border: 1px solid #1f2b3b;
+  padding: 2px;
+  text-align: center;
+  font-size: 18px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.month-average {
+  background: #1a2332;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+    
+    .day-header {
+      background: #2a3441;
+      font-weight: bold;
+      color: #9aa4b2;
+    }
+    
+ .chart-container {
+  margin-top: 20px;
+  width: 100%;
+  padding: 0;
+}   
+    .chart-title {
+      font-size: 20px;
+      margin-bottom: 15px;
+text-align: center;
+    }
+ 
+#dailyChart {
+  border: 1px solid #223049;
+  border-radius: 8px;
+  width: 100% !important;
+  height: 250px !important;
+}   
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <a href="/test/index.html" class="back-btn">← Dashboard</a>
+      <a href="/test/stats.html" class="back-btn" style="margin-left: 10px;">← Stats</a>
+    </div>
+    <div id="datetime">--</div>
+  </div>
+  
+  <div class="title" id="yearlyTitle">Glycémie moyenne sur l'année : -- mg/dL</div>
+  
+  <div class="calendar-container" id="calendarContainer">
+    <!-- Le tableau sera généré ici -->
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart-title">Évolution des moyennes quotidiennes</div>
+    <canvas id="dailyChart" width="1200" height="250"></canvas>
+  </div>
+
+  <script>
+    let D90 = [];
+    let dailyAverages = {};
+    // Données historiques CSV LibreView (46 jours)
+    const csvDailyAverages = {"2024-06-07": 120, "2024-06-08": 79, "2024-06-11": 144, "2024-06-12": 144, "2024-06-13": 148, "2024-06-14": 116, "2024-06-17": 184, "2024-06-18": 148, "2024-06-19": 188, "2024-06-20": 306, "2024-06-21": 156, "2025-08-14": 162, "2025-08-15": 127, "2025-08-16": 100, "2025-08-17": 139, "2025-08-18": 126, "2025-08-19": 109, "2025-08-20": 118, "2025-08-21": 107, "2025-08-22": 129, "2025-08-23": 126, "2025-08-24": 102, "2025-08-25": 122, "2025-08-26": 110, "2025-08-27": 210, "2025-08-28": 117, "2025-08-29": 134, "2025-08-30": 136, "2025-08-31": 112, "2025-09-01": 112, "2025-09-02": 118, "2025-09-03": 115, "2025-09-04": 112, "2025-09-05": 131, "2025-09-06": 126, "2025-09-07": 118, "2025-09-08": 111, "2025-09-09": 92, "2025-09-10": 91, "2025-09-11": 102, "2024-06-22": 122, "2024-06-23": 240, "2024-06-29": 172, "2024-06-30": 156, "2024-07-01": 145, "2024-07-02": 155};
+    
+    // Fusionner les données CSV avec les données Nightscout existantes
+    Object.keys(csvDailyAverages).forEach(date => {
+        if (!dailyAverages[date]) {
+            dailyAverages[date] = csvDailyAverages[date];
+        }
+    });
+    
+    console.log("Historique CSV chargé:", Object.keys(csvDailyAverages).length, "jours");
+    console.log("Données totales:", Object.keys(dailyAverages).length, "jours");
+
+    let yearlyAverage = 0;
+
+    async function fetchData() {
+      try {
+        const response = await fetch('/ns/api/v1/entries.json?count=50000');
+        const data = await response.json();
+        D90 = data.map(entry => ({
+          date: new Date(entry.date).getTime(),
+          sgv: entry.sgv
+        })).reverse();
+        
+        calculateDailyAverages();
+        generateCalendars();
+drawDailyChart();
+        updateDateTime();
+      } catch (error) {
+        console.error('Erreur récupération données:', error);
+      }
+    }
+
+    function calculateDailyAverages() {
+      const dailyData = {};
+      let totalSum = 0;
+      let totalCount = 0;
+
+      D90.forEach(entry => {
+        const date = new Date(entry.date);
+        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        
+        if (!dailyData[dateKey]) {
+          dailyData[dateKey] = [];
+        }
+        dailyData[dateKey].push(entry.sgv);
+      });
+
+      for (const [date, values] of Object.entries(dailyData)) {
+        if (values.length > 0) {
+          const average = Math.round(values.reduce((sum, val) => sum + val, 0) / values.length);
+          dailyAverages[date] = average;
+          totalSum += average;
+          totalCount++;
+        }
+      }
+
+      if (totalCount > 0) {
+        yearlyAverage = Math.round(totalSum / totalCount);
+        document.getElementById('yearlyTitle').textContent = `Glycémie moyenne sur l'année : ${yearlyAverage} mg/dL`;
+      
+console.log('Debug - Données calculées:', dailyAverages);
+}
+    }
+
+    function getGlucoseColor(glucose) {
+      if (glucose === null || glucose === undefined) return '#444444';
+      if (glucose < 70 || glucose > 200) return '#ef4444';
+      if ((glucose >= 70 && glucose < 90) || (glucose > 180 && glucose <= 200)) return '#f59e0b';
+      return '#22c55e';
+    }
+
+    function generateCalendars() {
+      const container = document.getElementById('calendarContainer');
+      const currentYear = 2024;
+      
+      // En-tête avec numéros des jours
+      const headerRow = document.createElement('div');
+      headerRow.className = 'calendar';
+      
+      const emptyHeader = document.createElement('div');
+      emptyHeader.className = 'month-name';
+      headerRow.appendChild(emptyHeader);
+      
+      for (let day = 1; day <= 31; day++) {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day day-header';
+        dayHeader.textContent = day;
+        headerRow.appendChild(dayHeader);
+      }
+      
+      const avgHeader = document.createElement('div');
+      avgHeader.className = 'month-average';
+      avgHeader.textContent = 'Moy';
+      headerRow.appendChild(avgHeader);
+      
+      container.appendChild(headerRow);
+      
+      // Mois de septembre à août
+      const months = [
+{ num: 7, name: 'Août', year: currentYear },
+        { num: 8, name: 'Sep', year: currentYear },
+        { num: 9, name: 'Oct', year: currentYear },
+        { num: 10, name: 'Nov', year: currentYear },
+        { num: 11, name: 'Déc', year: currentYear },
+        { num: 0, name: 'Jan', year: currentYear + 1 },
+        { num: 1, name: 'Fév', year: currentYear + 1 },
+        { num: 2, name: 'Mar', year: currentYear + 1 },
+        { num: 3, name: 'Avr', year: currentYear + 1 },
+        { num: 4, name: 'Mai', year: currentYear + 1 },
+        { num: 5, name: 'Juin', year: currentYear + 1 },
+        { num: 6, name: 'Juil', year: currentYear + 1 },
+        { num: 7, name: 'Août', year: currentYear + 1 }
+      ];
+
+      months.forEach(month => {
+        const monthRow = document.createElement('div');
+        monthRow.className = 'calendar';
+        
+        const monthName = document.createElement('div');
+        monthName.className = 'month-name';
+        monthName.textContent = month.name;
+        monthRow.appendChild(monthName);
+        
+        let monthSum = 0;
+        let monthCount = 0;
+        
+        for (let day = 1; day <= 31; day++) {
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day';
+          
+          const date = new Date(month.year, month.num, day);
+          if (date.getMonth() === month.num) {
+            const dateKey = `${month.year}-${String(month.num + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const average = dailyAverages[dateKey];
+            
+            if (average) {
+              cell.textContent = average;
+              cell.style.backgroundColor = getGlucoseColor(average);
+              cell.style.color = '#fff';
+              monthSum += average;
+              monthCount++;
+            }
+          } else {
+            cell.style.background = 'transparent';
+            cell.style.border = 'none';
+          }
+          
+          monthRow.appendChild(cell);
+        }
+        
+        const monthAvgCell = document.createElement('div');
+        monthAvgCell.className = 'month-average';
+        if (monthCount > 0) {
+          const monthAvg = Math.round(monthSum / monthCount);
+          monthAvgCell.textContent = monthAvg;
+          monthAvgCell.style.backgroundColor = getGlucoseColor(monthAvg);
+          monthAvgCell.style.color = '#fff';
+        }
+        monthRow.appendChild(monthAvgCell);
+        
+        container.appendChild(monthRow);
+      });
+    }
+
+
+function drawDailyChart() {
+  const canvas = document.getElementById('dailyChart');
+  const container = canvas.parentElement;
+  
+  // Ajuster la taille au conteneur pour utiliser toute la largeur
+  canvas.width = container.clientWidth - 20;
+  canvas.height = 250;
+  canvas.style.width = (container.clientWidth - 20) + 'px';
+  canvas.style.height = '250px';
+  
+  // Préparer les données
+  const sortedDates = Object.keys(dailyAverages).sort();
+  const chartData = sortedDates.map(date => ({
+    x: new Date(date),
+    y: dailyAverages[date]
+  }));
+
+  if (chartData.length === 0) return;
+
+  // Graphique simple avec canvas natif pour contrôler totalement la largeur
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Dessiner le graphique des moyennes quotidiennes
+  if (chartData.length > 1) {
+    const margin = 40;
+    const chartWidth = canvas.width - (margin * 2);
+    const chartHeight = canvas.height - (margin * 2);
+    
+    const minY = Math.min(...chartData.map(d => d.y)) - 20;
+    const maxY = Math.max(...chartData.map(d => d.y)) + 20;
+    
+    ctx.strokeStyle = '#22c55e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    chartData.forEach((point, index) => {
+      const x = margin + (index * chartWidth) / (chartData.length - 1);
+      const y = margin + chartHeight - ((point.y - minY) / (maxY - minY)) * chartHeight;
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+      
+      // Changer la couleur selon la valeur
+      const color = getGlucoseColor(point.y);
+      ctx.fillStyle = color;
+      ctx.fillRect(x - 2, y - 2, 4, 4);
+    });
+    
+    ctx.stroke();
+  }
+}
+
+
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('datetime').textContent = 
+        now.toLocaleDateString('fr-FR') + ' ' + 
+        now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchData();
+      setInterval(updateDateTime, 1000);
+    });
+  </script>
+</body>
+</html>

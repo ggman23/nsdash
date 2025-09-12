@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistiques Glycémiques</title>
+  <style>
+    body {
+  background: #0a0f1a;
+  color: #e6eef7;
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 5px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+    .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 10px;
+}
+    
+    .back-btn {
+      background: #0c121b;
+      border: 1px solid #223049;
+      color: #e6eef7;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .back-btn:hover {
+      background: #1a2332;
+    }
+    
+    .datetime {
+      font-size: 16px;
+      color: #9aa4b2;
+    }
+    
+    .title {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 28px;
+    }
+    
+    .stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 95vw;
+}
+    
+    .camembert {
+      text-align: center;
+    }
+    
+    .circle {
+      width: 200px;
+      height: 200px;
+      border: 3px solid #9aa4b2;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    
+    .circle-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .camembert-title {
+      font-size: 16px;
+      color: #9aa4b2;
+      margin-bottom: 10px;
+    }
+    
+    .info {
+      margin-top: 40px;
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+  <a href="/test/index.html" class="back-btn" style="padding: 6px 12px; font-size: 14px;">← Dashboard</a>
+<a href="/test/moydays.html" class="back-btn" style="padding: 6px 12px; font-size: 14px; margin-left: 10px;">← Moyennes</a>
+<a href="/test/2024.html" class="back-btn" style="margin-left: 10px;">2024</a>
+  <a href="/test/2023.html" class="back-btn" style="margin-left: 10px;">2023</a>
+  <a href="/test/2022.html" class="back-btn" style="margin-left: 10px;">2022</a>  
+
+
+
+<div class="datetime" id="datetime">--</div>
+</div>
+  <div class="stats-container" style="display: block; width: 98vw; margin-top: 10px;">
+  <h3 style="color: #e6eef7; text-align: center; margin-bottom: 10px; font-size: 24px;">Moyennes glycémiques par heure - Aujourd'hui</h3>
+  <canvas id="chartToday" width="1600" height="260" style="width: 100%; height: 260px; border: 1px solid #223049; border-radius: 8px; margin-bottom: 20px;"></canvas>
+  
+  <h3 id="historyTitle" style="color: #e6eef7; text-align: center; margin-bottom: 10px; font-size: 24px;">Moyennes glycémiques par heure - Historique complet</h3>
+  <canvas id="chartHistory" width="1600" height="260" style="width: 100%; height: 260px; border: 1px solid #223049; border-radius: 8px;"></canvas>
+</div>
+  <script>
+    // Affichage de la date/heure
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById('datetime').textContent = 
+        now.toLocaleDateString('fr-FR') + ' ' + 
+        now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+  </script>
+<script>
+let D90 = [];
+
+async function fetchData() {
+  try {
+    // Récupérer plus de données pour l'historique (90 jours)
+    const response = await fetch('/ns/api/v1/entries.json?count=25920'); // 90 jours
+    const data = await response.json();
+    D90 = data.map(entry => ({
+      date: new Date(entry.date).getTime(),
+      sgv: entry.sgv,
+      direction: entry.direction
+    })).reverse();
+    
+    drawHistograms();
+  } catch (error) {
+    console.error('Erreur récupération données:', error);
+  }
+}
+
+function drawHistograms() {
+  if (D90.length === 0) return;
+  
+  updateHistoryTitle();
+  drawTodayHistogram();
+  drawHistoryHistogram();
+}
+// Histogramme du jour
+function drawTodayHistogram() {
+  const canvas = document.getElementById('chartToday');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  // Données d'aujourd'hui seulement
+  const todayData = D90.filter(entry => {
+    const entryDate = new Date(entry.date);
+    return entryDate >= today && entryDate < tomorrow;
+  });
+  
+  const hourlyAverages = calculateHourlyAverages(todayData);
+  drawHourlyBars(ctx, hourlyAverages, width, height, "Aujourd'hui");
+}
+
+// Histogramme historique
+function drawHistoryHistogram() {
+  const canvas = document.getElementById('chartHistory');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  const hourlyAverages = calculateHourlyAverages(D90);
+  drawHourlyBars(ctx, hourlyAverages, width, height, "Historique complet");
+}
+
+// Calcul moyennes par heure
+function calculateHourlyAverages(data) {
+  const hourlyData = {};
+  
+  // Grouper par heure
+  for (let hour = 0; hour < 24; hour++) {
+    hourlyData[hour] = [];
+  }
+  
+  data.forEach(entry => {
+    const hour = new Date(entry.date).getHours();
+    hourlyData[hour].push(entry.sgv);
+  });
+  
+  // Calculer moyennes
+  const averages = {};
+  for (let hour = 0; hour < 24; hour++) {
+    if (hourlyData[hour].length > 0) {
+      const sum = hourlyData[hour].reduce((acc, val) => acc + val, 0);
+      averages[hour] = Math.round(sum / hourlyData[hour].length);
+    } else {
+      averages[hour] = null;
+    }
+  }
+  
+  return averages;
+}
+
+// Dessiner barres horaires
+function updateHistoryTitle() {
+  if (D90.length > 0) {
+    const firstDate = new Date(D90[0].date);
+    const lastDate = new Date(D90[D90.length - 1].date);
+    const daysDiff = Math.ceil((lastDate - firstDate) / (1000 * 60 * 60 * 24));
+    
+    document.getElementById('historyTitle').textContent = 
+      `Moyennes glycémiques par heure - Historique complet (${daysDiff} jours)`;
+  }
+}
+
+function drawHourlyBars(ctx, averages, width, height, title) {
+  const barWidth = width / 24;
+  const maxHeight = height - 50;
+  const maxGlucose = 300;
+  const minGlucose = 50;
+  
+  for (let hour = 0; hour < 24; hour++) {
+    const average = averages[hour];
+    const x = hour * barWidth;
+    
+    if (average !== null) {
+      const barHeight = ((average - minGlucose) / (maxGlucose - minGlucose)) * maxHeight;
+      const y = height - 30 - barHeight;
+      
+      const color = getGlucoseColor(average);
+      
+      ctx.fillStyle = color;
+      ctx.fillRect(x + 2, y, barWidth - 4, barHeight);
+      
+      ctx.strokeStyle = '#1f2b3b';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 2, y, barWidth - 4, barHeight);
+      
+      // Valeur au-dessus agrandie
+      ctx.fillStyle = '#e6eef7';
+      ctx.font = 'bold 22px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(average, x + barWidth/2, y - 10);
+    }
+    
+    // Label heure en bas agrandie
+    ctx.fillStyle = '#9aa4b2';
+    ctx.font = '20px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(hour + 'h', x + barWidth/2, height - 12);
+  }
+}
+function getGlucoseColor(glucose) {
+  if (glucose === null || glucose === undefined) {
+    return '#444444';
+  }
+  
+  if (glucose < 70 || glucose > 200) {
+    return '#ef4444'; // Rouge
+  } else if ((glucose >= 70 && glucose < 90) || (glucose > 180 && glucose <= 200)) {
+    return '#f59e0b'; // Orange
+  } else {
+    return '#22c55e'; // Vert
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  fetchData();
+  setInterval(fetchData, 300000);
+});
+</script>
+</body>
+</html>
